@@ -17,8 +17,8 @@ public interface RevealOverlayEffect {
 	@Composable
 	public fun Overlay(
 		revealState: RevealState,
-		currentRevealable: State<ActualRevealable?>,
-		previousRevealable: State<ActualRevealable?>,
+		currentRevealable: State<List<ActualRevealable>?>,
+		previousRevealable: State<List<ActualRevealable>?>,
 		modifier: Modifier,
 		content: @Composable RevealOverlayScope.(key: Key) -> Unit,
 	)

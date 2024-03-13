@@ -52,12 +52,12 @@ public class DimRevealOverlayEffect(
 	@Composable
 	override fun Overlay(
 		revealState: RevealState,
-		currentRevealable: State<ActualRevealable?>,
-		previousRevealable: State<ActualRevealable?>,
+		currentRevealable: State<List<ActualRevealable>?>,
+		previousRevealable: State<List<ActualRevealable>?>,
 		modifier: Modifier,
 		content: @Composable RevealOverlayScope.(key: Key) -> Unit,
 	) {
-		val currentItemHolder = currentRevealable.value?.let {
+		val currentItemHolder = currentRevealable.value?.map {
 			rememberDimItemHolder(
 				revealable = it,
 				fromState = Gone,
@@ -66,7 +66,7 @@ public class DimRevealOverlayEffect(
 			)
 		}
 
-		val prevItemHolder = previousRevealable.value?.let {
+		val prevItemHolder = previousRevealable.value?.map {
 			rememberDimItemHolder(
 				revealable = it,
 				fromState = Visible,
@@ -82,12 +82,12 @@ public class DimRevealOverlayEffect(
 				.graphicsLayer(alpha = 0.99f)
 				.drawBehind {
 					drawRect(color)
-					prevItemHolder?.let { with(it) { drawCutout(density) } }
-					currentItemHolder?.let { with(it) { drawCutout(density) } }
+					prevItemHolder?.forEach { with(it) { drawCutout(density) } }
+					currentItemHolder?.forEach { with(it) { drawCutout(density) } }
 				},
 		) {
-			prevItemHolder?.let { with(it) { Container(content = content) } }
-			currentItemHolder?.let { with(it) { Container(content = content) } }
+			prevItemHolder?.forEach { with(it) { Container(content = content) } }
+			currentItemHolder?.forEach { with(it) { Container(content = content) } }
 		}
 	}
 }

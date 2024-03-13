@@ -32,9 +32,9 @@ public class RevealState internal constructor(
 	private var didRestoreCurrentRevealable = false
 	private var visible by mutableStateOf(visible)
 	private val revealables = mutableStateMapOf<Key, Revealable>()
-	internal var currentRevealable by mutableStateOf<Revealable?>(null)
+	internal var currentRevealable by mutableStateOf<List<Revealable>?>(null)
 		private set
-	internal var previousRevealable by mutableStateOf<Revealable?>(null)
+	internal var previousRevealable by mutableStateOf<List<Revealable>?>(null)
 		private set
 
 	/**
@@ -49,15 +49,15 @@ public class RevealState internal constructor(
 	 * @see previousRevealableKey
 	 */
 	public val currentRevealableKey: Key?
-		get() = currentRevealable?.key
+		get() = currentRevealable?.map { it.key }
 
 	/**
 	 * Observable key of previous revealable which was displayed before [currentRevealableKey]
 	 *
 	 * @see currentRevealableKey
 	 */
-	public val previousRevealableKey: Key?
-		get() = previousRevealable?.key
+	public val previousRevealableKey: List<Key>?
+		get() = previousRevealable?.map { it.key }
 
 	/**
 	 * Observable set of keys known to this state instance
@@ -83,7 +83,12 @@ public class RevealState internal constructor(
 	 */
 	public suspend fun reveal(key: Key) {
 		require(containsRevealable(key)) { "Revealable with key \"$key\" not found" }
-		internalReveal(key)
+		internalReveal(listOf( key))
+	}
+
+	public suspend fun revealMultiple(keys: List<Key>) {
+		//require(containsRevealable(keys)) { "Revealable with key \"$keys\" not found" }
+		internalReveal(keys)
 	}
 
 	/**
@@ -94,14 +99,17 @@ public class RevealState internal constructor(
 	 */
 	public suspend fun tryReveal(key: Key): Boolean {
 		if (!containsRevealable(key)) return false
-		internalReveal(key)
+		internalReveal(listOf( key))
 		return true
 	}
 
-	private suspend fun internalReveal(key: Key) {
+	private suspend fun internalReveal(keys: List<Key>) {
 		mutex.withLock {
+			val revealable = keys.mapNotNull { key ->
+				revealables[key]
+			}
 			previousRevealable = currentRevealable
-			currentRevealable = revealables[key]
+			currentRevealable = revealable
 			visible = true
 		}
 	}
@@ -138,7 +146,7 @@ public class RevealState internal constructor(
 		revealables[revealable.key] = revealable
 
 		if (!didRestoreCurrentRevealable && restoreCurrentRevealableKey == revealable.key) {
-			currentRevealable = revealable
+			currentRevealable = listOf(revealable)
 			didRestoreCurrentRevealable = true
 		}
 	}

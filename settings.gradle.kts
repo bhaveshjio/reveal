@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":reveldemo")
+
+
 pluginManagement {
 	repositories {
 		google()
@@ -19,7 +22,7 @@ dependencyResolutionManagement {
 	}
 }
 
-rootProject.name = "Reveal"
+rootProject.name = "reveal"
 includeBuild("convention-plugins")
 include(
 	":reveal-common",

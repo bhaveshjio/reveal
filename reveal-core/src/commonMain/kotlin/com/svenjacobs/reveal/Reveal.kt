@@ -100,21 +100,25 @@ public fun Reveal(
 
 		val currentRevealable = remember {
 			derivedStateOf {
-				revealState.currentRevealable?.toActual(
-					density = density,
-					layoutDirection = layoutDirection,
-					additionalOffset = revealCanvasState.revealableOffset,
-				)
+				revealState.currentRevealable?.map {
+					it.toActual(
+						density = density,
+						layoutDirection = layoutDirection,
+						additionalOffset = revealCanvasState.revealableOffset,
+					)
+				}
 			}
 		}
 
 		val previousRevealable = remember {
 			derivedStateOf {
-				revealState.previousRevealable?.toActual(
-					density = density,
-					layoutDirection = layoutDirection,
-					additionalOffset = revealCanvasState.revealableOffset,
-				)
+				revealState.previousRevealable?.map {
+					it.toActual(
+						density = density,
+						layoutDirection = layoutDirection,
+						additionalOffset = revealCanvasState.revealableOffset,
+					)
+				}
 			}
 		}
 
@@ -124,13 +128,15 @@ public fun Reveal(
 			revealState.isVisible && rev != null -> Modifier.pointerInput(Unit) {
 				detectTapGestures(
 					onPress = { offset ->
-						rev?.key?.let(
-							if (rev?.area?.contains(offset) == true) {
-								rev?.onClick ?: onRevealableClick
-							} else {
-								onOverlayClick
-							},
-						)
+						rev?.forEach {
+							it.key.let(
+								if (it.area.contains(offset)) {
+									it.onClick ?: onRevealableClick
+								} else {
+									onOverlayClick
+								},
+							)
+						}
 					},
 				)
 			}
